@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Информация о машине</title>
+    <!-- Ваши стили и скрипты -->
+</head>
+<body>
+<div th:insert="blocks/header"></div>
+<div class="container">
+    <h1>Информация о машине</h1>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Марка</th>
+                <th>Модель</th>
+                <th>Год выпуска</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td th:text="${car.id}"></td>
+                <td th:text="${car.make}"></td>
+                <td th:text="${car.model}"></td>
+                <td th:text="${car.year}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <a th:href="@{/cars/{id}/edit(id=${car.id})}" class="btn btn-primary">Изменить</a>
+    <form method="post" th:method="DELETE" th:action="@{/cars/delete/{id}(id=${car.id})}">
+        <input type="submit" class="btn btn-danger" value="Удалить">
+    </form>
+</div>
+</body>
+</html>

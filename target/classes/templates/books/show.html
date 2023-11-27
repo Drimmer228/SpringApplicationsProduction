@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная страница</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            background-image: linear-gradient(to right, #007afd, #007afd);
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="blocks/header"></div>
+
+<div class="container mt-5" id="content">
+    <div class="container">
+        <h2>Информация о книге</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                <tr>
+                    <th>Заголовок</th>
+                    <th>Автор</th>
+                    <th>Количество страниц</th>
+                    <th>Дополнительная информация</th>
+                    <th>Тип</th>
+                    <th>Категория</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td th:text="${book.title}"></td>
+                    <td th:text="${book.author}"></td>
+                    <td th:text="${book.pageCount}"></td>
+                    <td th:text="${book.bookDetail.additionalInfo}"></td>
+                    <td th:text="${book.bookDetail.type}"></td>
+                    <td th:text="${book.category.categoryName}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <a th:href="@{/books/{id}/edit(id=${book.id})}" class="btn btn-primary">Редактировать</a>
+        <form method="post" th:action="@{/books/delete/{id}(id=${book.id})}">
+            <input type="hidden" name="_method" value="delete">
+            <input type="submit" class="btn btn-danger" value="Удалить">
+        </form>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2023 DmitryCompany</p>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

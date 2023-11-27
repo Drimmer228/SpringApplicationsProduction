@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Результаты поиска - Люди</title>
+</head>
+<body>
+<div th:insert="blocks/header"></div>
+<h2>Результаты поиска - Люди</h2>
+<table>
+  <thead>
+  <tr>
+    <th>Имя</th>
+    <th>Возраст</th>
+    <th>Email</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="person : ${persons}">
+    <td th:text="${person.name}"></td>
+    <td th:text="${person.age}"></td>
+    <td th:text="${person.email}"></td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

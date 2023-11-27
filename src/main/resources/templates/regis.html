@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+  <title>Регистрация</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f8f9fa;
+    }
+
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+<div class="card p-4">
+  <h2 class="text-center mb-4">Регистрация</h2>
+  <form th:action="@{/registration}" method="post">
+    <div class="form-group">
+      <label> Придумайте логин : <input type="text" name="username"/> </label>
+    </div>
+    <div class="form-group">
+      <label> Придумайте пароль : <input type="password" name="password"/> </label>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
+  </form>
+
+  <div th:if="${message}">
+    Пользователь уже существует
+  </div>
+
+  <a href="/login">Авторизация</a>
+</div>
+</body>
+</html>

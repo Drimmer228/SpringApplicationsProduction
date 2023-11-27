@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Главная страница</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar {
+      background-image: linear-gradient(to right, #007afd, #28a645, #17a1b7, #fdc007, #db3545);
+    }
+
+    .btn-warning {
+      background-color: #ffc107;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="/home">РазноеТут.нет</a>
+  <form th:action="@{/logout}" method="post">
+    <button type="submit" class="btn btn-warning">Выйти из аккаунта</button>
+  </form>
+</nav>
+</body>
+</html>

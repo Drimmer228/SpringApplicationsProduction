@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Лист продуктов</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000000;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #4D82FE;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="blocks/header"></div>
+<h1>Лист продуктов</h1>
+<form action="/products/search" method="get">
+    <label for="search">Поиск по названию продукта:</label>
+    <input type="text" id="search" name="name">
+    <button type="submit">Искать</button>
+</form>
+
+<table border="1">
+    <tr>
+        <th>Название</th>
+        <th>Цена</th>
+        <th>Количество</th>
+    </tr>
+    <tr th:each="product : ${products}">
+        <td>
+            <a th:href="@{/products/{id}(id=${product.getId()})}" th:text="${product.getName()}"></a>
+        </td>
+        <td th:text="${product.getPrice()}"></td>
+        <td th:text="${product.getQuantity()}"></td>
+    </tr>
+</table>
+
+<a href="/products/new">Создать новый продукт</a>
+</body>
+</html>

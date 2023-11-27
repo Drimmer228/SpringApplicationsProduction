@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Информация о продукте</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body>
+<div th:insert="blocks/header"></div>
+<div class="container">
+    <h1>Информация о продукте</h1>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+            <tr>
+                <th>Уникальный номер</th>
+                <th>Имя</th>
+                <th>Цена</th>
+                <th>Количество</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td th:text="${product.getId()}"></td>
+                <td th:text="${product.getName()}"></td>
+                <td th:text="${product.getPrice()}"></td>
+                <td th:text="${product.getQuantity()}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <a th:href="@{/products/{id}/edit(id=${product.getId()})}" class="btn btn-primary">Edit</a>
+    <form method="post" th:method="DELETE" th:action="@{/products/delete/{id}(id=${product.getId()})}">
+        <input type="submit" class="btn btn-danger" value="Удалить">
+    </form>
+</div>
+</body>
+</html>
