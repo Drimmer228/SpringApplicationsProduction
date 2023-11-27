@@ -4,6 +4,8 @@ import com.example.springmodels.models.CarModel;
 import com.example.springmodels.repositories.CarRepository;
 import com.example.springmodels.repositories.PersonRepository;
 import javax.validation.Valid;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,6 +15,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/cars")
+@PreAuthorize("hasAnyAuthority('MODER', 'USER')")
 public class CarController {
 
     private final CarRepository carRepository;

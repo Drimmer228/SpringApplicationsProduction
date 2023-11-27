@@ -6,6 +6,8 @@ import com.example.springmodels.repositories.BookCategoryRepository;
 import com.example.springmodels.repositories.BookDetailRepository;
 import com.example.springmodels.repositories.BookRepository;
 import javax.validation.Valid;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,6 +18,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/books")
+@PreAuthorize("hasAnyAuthority('MODER', 'USER')")
 public class BookController {
 
     private final BookRepository bookRepository;

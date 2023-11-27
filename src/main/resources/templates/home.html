@@ -39,6 +39,23 @@
       color: #fff;
       text-decoration: none;
     }
+
+    .admin-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      transition: transform 0.3s ease-out;
+    }
+
+    .admin-button:hover {
+      transform: scale(1.1);
+    }
+
+    .admin-button a {
+      color: #fff;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -55,6 +72,10 @@
       <a href="/houses" class="btn btn-danger btn-block mb-3 animated-button">Дома</a>
     </div>
   </div>
+</div>
+
+<div class="admin-button">
+  <a href="/admin" class="btn btn-primary animated-button">Панель администратора</a>
 </div>
 
 <div th:insert="blocks/footer"></div>
