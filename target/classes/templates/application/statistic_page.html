@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>График продаж приложения</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #salesChart {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: #333;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<a href="/user/profile" class="back-button"><i class="fas fa-arrow-left"></i></a>
+
+<div class="container">
+    <h1>График продаж приложения</h1>
+    <h1 th:text="${appl.applicationName}"></h1>
+    <input type="hidden" id="idSales" th:value="${appl.id}">
+    <canvas id="salesChart" width="800" height="400"></canvas>
+</div>
+
+<script>
+    const id = document.getElementById("idSales");
+    fetch('/statistic/salesData/' + id.value)
+        .then(response => response.json())
+        .then(data => {
+            const allMonths = [
+                'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
+
+            const salesData = data.reduce((acc, curr) => {
+                acc[curr.purchaseMonth] = curr;
+                return acc;
+            }, {});
+
+            const months = allMonths.map(month => salesData[month] ? salesData[month].purchaseMonth : month);
+            const purchaseCounts = allMonths.map(month => salesData[month] ? salesData[month].purchaseCount : 0);
+            const purchasePrices = allMonths.map(month => salesData[month] ? salesData[month].purchasePrice : 0);
+
+            const ctx = document.getElementById('salesChart').getContext('2d');
+
+            const salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Количество покупок',
+                            data: purchaseCounts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Общая выручка',
+                            data: purchasePrices,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 3
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Ошибка получения данных:', error);
+        });
+
+</script>
+</body>
+</html>

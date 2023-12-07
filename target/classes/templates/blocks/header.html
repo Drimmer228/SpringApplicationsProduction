@@ -1,25 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Главная страница</title>
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .navbar {
-      background-image: linear-gradient(to right, #007afd, #28a645, #17a1b7, #fdc007, #db3545);
-    }
+    <meta charset="UTF-8">
+    <title>Панель навигации</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            background-color: #6c757d;
+            padding: 15px;
+            z-index: 100;
+            margin-bottom: 20px;
+        }
 
-    .btn-warning {
-      background-color: #ffc107;
-    }
-  </style>
+        header ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        header ul li:first-child{
+            margin-right: auto;
+        }
+
+        header ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .icon {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-100%);
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 1.0s forwards;
+        }
+
+        .slide-out {
+            animation: slideOut 1.0s forwards;
+        }
+
+        .notification-panel {
+            display: none;
+            position: fixed;
+            width: 300px;
+            overflow-y: auto;
+            max-height: 500px;
+            background-color: #f5f5f5;
+            border: 2px solid #6c757d;
+            border-radius: 10px;
+            padding: 10px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .scroll-button {
+            cursor: pointer;
+            display: none;
+            position: absolute;
+            top: 5px;
+        }
+
+        .scroll-up {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .scroll-down {
+            left: 50%;
+            bottom: 5px;
+            transform: translateX(-50%);
+        }
+
+        .notification-panel h2 {
+            margin-top: 0;
+        }
+
+        .notification {
+            margin-bottom: 10px;
+            margin-top: 10px;
+            padding: 5px;
+            border: 1px solid #0b0a26;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+        .notification .bullet {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .unread .bullet {
+            background-color: red;
+        }
+
+        .notification.read {
+            background-color: #f0f0f0;
+        }
+
+        header nav ul li a img{
+            border-radius: 5px;
+        }
+        header nav ul li:first-child{
+            padding: 5px;
+            border-radius: 10px;
+            background-color: darkorange;
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="/home">РазноеТут.нет</a>
-  <form th:action="@{/logout}" method="post">
-    <button type="submit" class="btn btn-warning">Выйти из аккаунта</button>
-  </form>
-</nav>
+<header>
+    <nav>
+        <ul>
+            <li><a href="/home">
+                <img class="icon" src="/icons/logoIcon.png" alt="На главную">
+                <span>AppSeller.Net</span>
+            </a></li>
+            <li th:if="${#httpServletRequest.remoteUser == null}"><a href="/registration">Зарегистрироваться</a></li>
+            <li th:if="${#httpServletRequest.remoteUser == null}"><a href="/login">Войти</a></li>
+
+            <li>
+                <a th:if="${#httpServletRequest.remoteUser != null}" onclick="toggleNotifications()">
+                    <img class="icon" src="/icons/notification.png" alt="Уведомления">
+                </a>
+                <div class="notification-panel" id="notificationPanel">
+                    <h2>Ваши уведомления</h2>
+                    <button onclick="clearNotifications()">Очистить уведомления</button>
+                </div>
+            </li>
+
+            <li th:if="${#httpServletRequest.remoteUser != null}">
+                <a href="/user/profile">
+                    <img class="icon" src="/icons/user.png" alt="Профиль">
+                </a>
+            </li>
+            <li th:if="${#httpServletRequest.remoteUser != null}">
+                <a href="/logout">
+                    <img class="icon" src="/icons/logout.png" alt="Выход">
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+    function loadNotifications() {
+        fetch('/api/notifications')
+            .then(response => response.json())
+            .then(notifications => {
+                const notificationPanel = document.getElementById('notificationPanel');
+                notificationPanel.innerHTML = '<h2>Ваши уведомления</h2>';
+
+                const clearButton = document.createElement('button');
+                clearButton.textContent = 'Очистить уведомления';
+                clearButton.className = 'btn btn-warning';
+                clearButton.onclick = clearNotifications;
+                notificationPanel.appendChild(clearButton);
+
+                notifications.forEach(notification => {
+                    const notificationElement = document.createElement('div');
+                    notificationElement.classList.add('notification');
+                    notificationElement.innerHTML = `<span class="bullet"></span>${notification.message}`;
+                    if (!notification.read) {
+                        notificationElement.classList.add('unread');
+                        notificationElement.onclick = function () {
+                            expandNotification(notification.id);
+                        };
+                    }
+                    notificationPanel.appendChild(notificationElement);
+                });
+
+            })
+            .catch(error => console.error('Ошибка при загрузке уведомлений:', error));
+    }
+
+
+    function expandNotification(notificationId) {
+        fetch(`/api/notifications/${notificationId}`, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    loadNotifications();
+                } else {
+                    console.error('Не удалось отметить уведомление как прочитанное');
+                }
+            })
+            .catch(error => console.error('Ошибка при обновлении статуса уведомления:', error));
+    }
+
+    function clearNotifications() {
+        fetch('/api/notifications/clear', { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    toggleNotifications();
+                } else {
+                    console.error('Не удалось очистить уведомления');
+                }
+            })
+            .catch(error => console.error('Ошибка при очистке уведомлений:', error));
+    }
+
+    function toggleNotifications() {
+        const notificationPanel = document.getElementById('notificationPanel');
+        if (notificationPanel.style.display === 'block') {
+            notificationPanel.classList.add('slide-out');
+            setTimeout(() => {
+                notificationPanel.style.display = 'none';
+                notificationPanel.classList.remove('slide-out');
+            }, 1000);
+        } else {
+            notificationPanel.style.display = 'block';
+            notificationPanel.classList.add('slide-in');
+            loadNotifications();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const notificationPanel = document.getElementById('notificationPanel');
+        const scrollUpButton = document.createElement('div');
+        const scrollDownButton = document.createElement('div');
+        const clearButton = document.createElement('button');
+
+        scrollUpButton.innerHTML = '⬆️';
+        scrollUpButton.classList.add('scroll-button', 'scroll-up');
+        scrollUpButton.onclick = function () {
+            notificationPanel.scrollTop -= 50;
+        };
+
+        scrollDownButton.innerHTML = '⬇️';
+        scrollDownButton.classList.add('scroll-button', 'scroll-down');
+        scrollDownButton.onclick = function () {
+            notificationPanel.scrollTop += 50;
+        };
+
+        notificationPanel.appendChild(scrollUpButton);
+        notificationPanel.appendChild(scrollDownButton);
+
+        clearButton.textContent = 'Очистить уведомления';
+        clearButton.onclick = clearNotifications;
+        notificationPanel.appendChild(clearButton);
+
+        loadNotifications();
+    });
+</script>
+
 </body>
 </html>

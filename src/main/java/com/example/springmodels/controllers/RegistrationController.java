@@ -1,8 +1,8 @@
 package com.example.springmodels.controllers;
 
-import com.example.springmodels.models.modelUser;
-import com.example.springmodels.models.roleEnum;
-import com.example.springmodels.repositories.UserRepository;
+import com.example.springmodels.ApiInterface;
+import com.example.springmodels.models.RoleModel;
+import com.example.springmodels.models.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -10,12 +10,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.Collections;
+import java.time.LocalDate;
 
 @Controller
 public class RegistrationController {
+    private final ApiInterface apiInterface;
+
     @Autowired
-    private UserRepository userRepository;
+    public RegistrationController(ApiInterface apiInterface) {
+        this.apiInterface = apiInterface;
+    }
     @Autowired
     private PasswordEncoder passwordEncoder;
     @GetMapping("/registration")
@@ -24,18 +28,24 @@ public class RegistrationController {
         return "regis";
     }
     @PostMapping("/registration")
-    private String Reg(modelUser user, Model model)
-    {
-        modelUser user_from_db = userRepository.findByUsername(user.getUsername());
-        if (user_from_db != null)
-        {
+    private String Reg(UserModel user, Model model) {
+        UserModel userFromDb = apiInterface.getUserAtUserName(user.getUsername());
+        if (userFromDb != null) {
             model.addAttribute("message", "Пользователь с таким логином уже существует");
             return "regis";
         }
+
+        RoleModel userRole = apiInterface.getRoleAtName("User");
+        user.setRole(userRole);
         user.setActive(true);
-        user.setRoles(Collections.singleton(roleEnum.USER));
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        LocalDate registrationDate = LocalDate.now();
+        user.setRegistrationDate(registrationDate);
+        user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
+        user.setTotalSpent(0);
+        user.setPainFee(false);
+        user.setPersonalDiscount(0);
+        user.setBalance(0);
+        apiInterface.saveUser(user);
         return "redirect:/login";
     }
 }

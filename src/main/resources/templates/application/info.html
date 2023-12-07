@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр заявки</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.css" rel="stylesheet">
+    <style>
+        .overlay {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -20%);
+            width: 75%;
+            height: 60%;
+            background-color: rgba(0, 0, 0, 1) !important;
+            display: none;
+            justify-content: center;
+            border-radius: 10px;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .cropper-modal {
+            background-color: rgba(255, 255, 255, 1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .crop-btn {
+            display: block;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .image-upload {
+            cursor: pointer;
+        }
+
+        .content-below-header {
+            margin-top: 100px;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #6c757d;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .drag-over {
+            background-color: #f0f0f0;
+        }
+
+        .statusConsideration{
+            border-radius: 20px;
+            padding: 10px;
+            text-transform: uppercase;
+            background-color: yellow;
+        }
+        .statusApproved{
+            border-radius: 20px;
+            padding: 10px;
+            text-transform: uppercase;
+            background-color: lightgreen;
+        }
+        .statusRejected{
+            border-radius: 20px;
+            padding: 10px;
+            text-transform: uppercase;
+            background-color: red;
+        }
+        .statusPublished{
+            border-radius: 20px;
+            padding: 10px;
+            text-transform: uppercase;
+            background-color: lightgreen;
+        }
+        .statusSubmitted {
+            border-radius: 20px;
+            padding: 10px;
+            text-transform: uppercase;
+            background-color: gray;
+        }
+
+        .img-show {
+            width: 20%;
+            display: flex;
+            justify-content: center;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+    <div class="cropper-modal" id="cropperModal">
+        <img id="cropperImg" src="" alt="Обрезанное изображение">
+        <button class="btn btn-primary crop-btn" id="cropButton">Обрезать</button>
+    </div>
+</div>
+
+<div th:insert="blocks/header"></div>
+
+<div th:if="${error}" class="error-message">
+    <p th:text="${error}"></p>
+</div>
+<main class="content-below-header">
+    <div class="container mt-4">
+        <form th:action="@{/application/updateOrDelete/{id}(id=${application_model.id})}" th:object="${application_model}" method="post" enctype="multipart/form-data">
+            <div th:if="${application_model.active == null}">
+                <div class="text-center">
+                    <label class="form-label display-5" th:classappend="${application_model.status.name eq 'Отправлено на рассмотрение'} ? 'text-muted' : ''">ИНФОРМАЦИЯ ПО ЗАЯВКЕ</label>
+                </div>
+                <div class="mb-3 text-center">
+                    <label th:text="${application_model.status != null ? application_model.status.name : ''}"
+                           th:class="${application_model.status != null ?
+                (application_model.status.name eq 'На рассмотрении' ? 'statusConsideration' :
+                (application_model.status.name eq 'Одобрено' ? 'statusApproved' :
+                (application_model.status.name eq 'Отклонено' ? 'statusRejected' :
+                (application_model.status.name eq 'Опубликовано' ? 'statusPublished' :
+                (application_model.status.name eq 'Отправлено на рассмотрение' ? 'statusSubmitted' : null))))): ''}"></label>
+                </div>
+            </div>
+            <div style="display: none">
+                <label for="publisher" class="form-label">Заявитель:</label>
+                <input th:readonly="${true}" type="text" class="form-control" id="publisher" th:field="*{publisher}">
+            </div>
+
+            <div style="display: none">
+                <label for="status" class="form-label">Статус заявки:</label>
+                <input th:readonly="${true}" type="text" class="form-control" id="status" th:field="*{status}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Загруженная обложка приложения:</label>
+                <img class="img-show" th:src="@{http://localhost:8008/application/downloadImage/{id}(id=${application_model.id})}" alt="Изображение приложения" id="applicationImage">
+            </div>
+
+            <div class="mb-3" th:style="${application_model.status.name eq 'Отправлено на рассмотрение' or application_model.status.name eq 'Одобрено'} ?  'display:block;' : 'display:none;'">
+                <label for="imageUpload" class="form-label">Загрузите изображение (соотношение сторон 9:16):</label>
+                <div class="image-upload drop-zone" id="imageUpload">
+                    <p>Перетащите сюда изображение или нажмите для выбора</p>
+                    <input type="file" name="image" id="imageApp" class="form-control" accept="image/*">
+                </div>
+                <small id="imageHelp" class="form-text text-muted">Поддерживаемые форматы: JPG, PNG, GIF и т.д.</small>
+            </div>
+
+            <div class="mb-3">
+                <label for="applicationName" class="form-label">Название приложения:</label>
+                <input th:readonly="${application_model.status.name ne 'Отправлено на рассмотрение' and application_model.getActive eq null}" type="text" class="form-control" id="applicationName" th:field="*{applicationName}">
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Функциональность:</label>
+                <textarea th:readonly="${application_model.status.name ne 'Отправлено на рассмотрение' and application_model.getActive eq null}" class="form-control" id="description" th:field="*{description}"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="price" class="form-label">Цена:</label>
+                <input th:readonly="${application_model.status.name ne 'Отправлено на рассмотрение' and application_model.getActive eq null}" type="number" class="form-control" id="price" th:field="*{price}">
+            </div>
+            <div class="mb-3">
+                <label for="category" class="form-label">Категория:</label>
+                <select class="form-select" id="category" th:field="*{category}">
+                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.categoryName}"></option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="executableFile" class="form-label">Исполняемый файл (*.apk):</label>
+                <div class="drop-zone" id="drop-zone">
+                    <p th:style="${application_model.status.name eq 'Отправлено на рассмотрение' or application_model.status.name eq 'Одобрено'} ?  'display:block;' : 'display:none;'" >Перетащите сюда файл или нажмите для выбора</p>
+                    <input th:style="${application_model.status.name eq 'Отправлено на рассмотрение' or application_model.status.name eq 'Одобрено'} ?  'display:block;' : 'display:none;'" type="file" name="file" id="executableFile" class="form-control" accept=".apk">
+                    <label class="form-label">Прикрепленный файл APK:</label>
+                    <a th:href="@{http://localhost:8008/application/downloadFile/{id}(id=${application_model.id})}" class="btn btn-primary" download="file.apk" th:text="${application_model.nameExecutableFile}"></a>
+                    <input type="hidden" id="nameExecutableFile" name="nameExecutableFile"  th:field="*{nameExecutableFile}" th:value="${application_model.nameExecutableFile}"/>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="occupiedSpace" class="form-label">Занимаемый объем памяти:</label>
+                <input th:readonly="${application_model.status.name ne 'Отправлено на рассмотрение' and application_model.getActive eq null}" type="text" class="form-control" id="occupiedSpace" name="occupiedSpace" th:field="*{occupiedSpace}">
+            </div>
+            <div class="mb-3">
+                <label for="ageLimit" class="form-label">Возрастное ограничение:</label>
+                <input th:readonly="${application_model.status.name ne 'Отправлено на рассмотрение' and application_model.getActive eq null}" type="text" class="form-control" id="ageLimit" name="ageLimit" th:field="*{ageLimit}">
+            </div>
+            <button th:if="${application_model.status.name eq 'Отправлено на рассмотрение' or application_model.status.name eq 'Одобрено'}" type="submit" name="action" value="save" class="btn btn-primary">Сохранить</button>
+            <button th:if="${application_model.status.name eq 'Отправлено на рассмотрение'}" type="submit" name="action" value="delete" class="btn btn-primary">Отозвать заявку</button>
+            <button th:if="${application_model.status.name eq 'На рассмотрении'}" type="submit" name="action" value="confirmApplication" class="btn btn-success">Одобрить заявку</button>
+            <button th:if="${application_model.status.name eq 'На рассмотрении'}" type="submit" name="action" value="rejectApplication" class="btn btn-danger">Отклонить заявку</button>
+            <button th:if="!${application_model.active} and ${application_model.status.name eq 'Одобрено'}" type="submit" name="action" value="uploadInCatalog" class="btn btn-success">Опубликовать приложение в каталог</button>
+            <button th:if="${application_model.active}" type="submit" name="action" value="rejectFromCatalog" class="btn btn-danger">Убрать приложение из каталога</button>
+        </form>
+    </div>
+</main>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+
+    dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('drag-over');
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.js"></script>
+<script>
+    const imageInput = document.getElementById('imageApp');
+    const overlay = document.getElementById('overlay');
+    const cropperModal = document.getElementById('cropperModal');
+    const cropperImg = document.getElementById('cropperImg');
+    const cropButton = document.getElementById('cropButton');
+    let cropper;
+
+    imageInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            overlay.style.display = 'flex';
+            cropperModal.style.display = 'block';
+            cropperImg.src = event.target.result;
+
+            cropper = new Cropper(cropperImg, {
+                aspectRatio: 9 / 16,
+                viewMode: 1,
+            });
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    cropButton.addEventListener('click', () => {
+        const croppedCanvas = cropper.getCroppedCanvas({ width: 200, height: 200 });
+
+        overlay.style.display = 'none';
+        cropperModal.style.display = 'none';
+
+        const blob = croppedCanvas.toDataURL('image/jpeg', 0.8);
+        document.getElementById('applicationImage').src = blob;
+    });
+</script>
+</body>
+</html>

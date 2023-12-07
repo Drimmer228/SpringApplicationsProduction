@@ -1,67 +1,36 @@
 package com.example.springmodels.controllers;
 
-import com.example.springmodels.models.modelUser;
-import com.example.springmodels.models.roleEnum;
-import com.example.springmodels.repositories.UserRepository;
+import com.example.springmodels.ApiInterface;
+import com.example.springmodels.models.ApplicationModel;
+import com.example.springmodels.models.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 @Controller
-@RequestMapping("/admin")
-@PreAuthorize("hasAnyAuthority('ADMIN')")
+@RequestMapping("/user")
 public class UserController {
+    private final ApiInterface apiInterface;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @GetMapping()
-    public String userView(Model model)
-    {
-        model.addAttribute("user_list", userRepository.findAll());
-        return "admin/index";
+    public UserController(ApiInterface apiInterface) {
+        this.apiInterface = apiInterface;
     }
 
-    @GetMapping("/{id}")
-    public String detailView(@PathVariable Long id, Model model)
-    {
-        model.addAttribute("user_object",userRepository.findById(id).orElseThrow());
-        return "admin/info";
+    @GetMapping("/profile")
+    String getProfilePage(Model model){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserModel userModel = apiInterface.getUserAtUserName(auth.getName());
+        List<ApplicationModel> applicationModel = apiInterface.findAllByPublisherId(userModel.getId());
+        model.addAttribute("user", userModel);
+        model.addAttribute("applications", applicationModel);
+        model.addAttribute("salesStatisticsModel", apiInterface.findAllStatistic());
+        return "user/profile";
     }
-
-    @GetMapping("/{id}/update")
-    public String updView(@PathVariable Long id, Model model)
-    {
-        model.addAttribute("user_object",userRepository.findById(id).orElseThrow());
-        model.addAttribute("roles", roleEnum.values());
-        return "admin/update";
-    }
-
-    @PostMapping("/{id}/update")
-    public String update_user(@RequestParam String username,
-                              @RequestParam(name="roles[]", required = false) String[] roles,
-                              @PathVariable Long id)
-    {
-        modelUser user = userRepository.findById(id).orElseThrow();
-        user.setUsername(username);
-
-        user.getRoles().clear();
-        if(roles != null)
-        {
-            for(String role: roles)
-            {
-                user.getRoles().add(roleEnum.valueOf(role));
-            }
-        }
-
-        userRepository.save(user);
-        return "redirect:/admin/{id}";
-    }
-
 }

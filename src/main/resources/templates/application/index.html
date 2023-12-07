@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Заявки на разработку</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .content-below-header {
+            margin-top: 80px;
+            margin-bottom: 20px;
+        }
+
+        .user-card {
+            font-size: 20px;
+            background-color: gray;
+            border-radius: 10px;
+            border: 1px solid #ced4da;
+            margin-bottom: 10px;
+        }
+        .user-card-header {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ced4da;
+            position: relative;
+        }
+        .user-card-body {
+            padding: 10px;
+        }
+        .expand-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .user-name {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="blocks/header"></div>
+
+<main class="content-below-header">
+
+</main>
+
+<div class="container mt-4">
+    <h1>Список заявок</h1>
+    <div class="accordion" id="userAccordion" th:fragment="accordion">
+        <div th:each="name, iterStat : ${userNames}">
+            <div class="user-card">
+                <div class="user-card-header" th:id="'heading' + ${iterStat.index}" data-toggle="collapse" th:data-target="'#collapse' + ${iterStat.index}" aria-expanded="${iterStat.first ? 'true' : 'false'}" th:aria-controls="'collapse' + ${iterStat.index}">
+                    <span class="expand-icon">&#9662;</span>
+                    <span class="user-name" th:text="${name}"></span>
+                </div>
+
+                <div th:id="'collapse' + ${iterStat.index}" th:classappend="${iterStat.first ? 'collapse show' : 'collapse'}" th:aria-labelledby="'heading' + ${iterStat.index}" data-parent="#userAccordion">
+                    <div class="user-card-body">
+                        <ul>
+                            <li th:each="appl : ${applications}" th:if="${name == appl.publisher.username}">
+                                <span th:text="${appl.applicationName}"></span>
+                                <span> - </span>
+                                <span th:text="${appl.status.name}"></span>
+                                <span th:if="${appl.status.name == 'Отправлено на рассмотрение' or appl.status.name == 'На рассмотрении'}">
+                                    <a th:href="@{'/moder/application/show/' + ${appl.id}}" th:method="GET" class="btn btn-primary">Рассмотреть</a>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

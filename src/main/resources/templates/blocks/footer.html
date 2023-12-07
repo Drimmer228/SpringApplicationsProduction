@@ -2,28 +2,102 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Главная страница</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Title</title>
     <style>
         footer {
-            background-color: #f8f9fa;
-            padding: 20px 0;
-            position: absolute;
+            background-color: #6c757d;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
             bottom: 0;
             width: 100%;
+        }
+
+        footer .left,
+        footer .right {
+            display: inline-block;
+        }
+        footer .center {
             text-align: center;
+            flex-grow: 1;
+        }
+        footer ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        footer ul li {
+            margin-right: 15px;
+            display: inline;
+        }
+        footer ul li a {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .contact-info {
+            border-color: #0b0a26;
+            border-style: solid;
+            border-width: 2px;
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #fff;
+            padding: 15px;
+            width: 300px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+            transform: translateX(-100%);
+        }
+
+
+        .show-contact-info {
+            display: block;
+            transform: translateX(0);
+        }
+
+        .close-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            color: red;
         }
     </style>
 </head>
 <body>
 <footer>
-    <div class="container">
-        <p>&copy; 2023 DmitryCompany</p>
+    <div class="left">
+        <ul>
+            <li><a href="#" onclick="toggleContactPanel()">Контакты</a></li>
+        </ul>
+    </div>
+    <div class="center">
+        <span>&copy; DRcorp</span>
+    </div>
+    <div class="right">
+        <ul>
+            <li><a href="/home/about">О нас</a></li>
+        </ul>
+    </div>
+    <div class="contact-info" id="contactInfo">
+        <span class="close-button" onclick="toggleContactPanel()">✖</span>
+        <p>Адрес: Нахимовский проспект д.21</p>
+        <p>Email: isip_d.v.gusev@mpt.ru</p>
+        <p>Телефон: +7 977 371 34 46</p>
     </div>
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    function toggleContactPanel() {
+        var contactPanel = document.getElementById('contactInfo');
+        contactPanel.classList.toggle('show-contact-info');
+    }
+</script>
 </body>
 </html>

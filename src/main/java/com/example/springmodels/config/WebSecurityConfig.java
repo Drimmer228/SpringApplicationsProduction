@@ -8,13 +8,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.SecurityFilterChain;
 
 import javax.sql.DataSource;
 
@@ -37,13 +32,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(getPasswordEncoder())
-                .usersByUsernameQuery("select username, password, active from model_user where username =?")
-                .authoritiesByUsernameQuery("select u.username, ur.roles from model_user u inner join user_role ur on u.id_user = ur.user_id where u.username=?");
+                .usersByUsernameQuery("select username, user_password, is_active from users where username =?")
+                .authoritiesByUsernameQuery("SELECT u.username, r.role_name FROM Users u " +
+                        "INNER JOIN Roles r ON u.role_id = r.id WHERE u.username=?");
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/login","/registration").permitAll()
+        http.authorizeRequests().antMatchers("/login","/registration", "/home").permitAll()
                 .anyRequest().authenticated().and().formLogin().loginPage("/login")
                 .defaultSuccessUrl("/home").permitAll().and().logout().permitAll()
                 .and().csrf().disable().cors().disable();

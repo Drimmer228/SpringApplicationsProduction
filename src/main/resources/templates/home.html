@@ -1,83 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Главная страница</title>
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
+    <meta charset="UTF-8">
+    <title>AppSeller.Net</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
 
-    .animated-button {
-      transition: transform 0.3s ease-out;
-    }
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            position: fixed;
+            width: 100%;
+            z-index: 999;
+        }
 
-    .animated-button:hover {
-      transform: scale(1.1);
-    }
+        main {
+            padding: 120px 50px 50px 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+            margin: auto;
+            overflow-y: auto;
+        }
 
-    .btn-primary {
-      background-color: #007bff;
-    }
+        section {
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(45deg, #232323, #454545, #303030, #555555);
+            color: #fff;
+            padding: 40px;
+            width: calc(100% - 100px);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
 
-    .btn-success {
-      background-color: #28a745;
-    }
-
-    .btn-info {
-      background-color: #17a2b8;
-    }
-
-    .btn-warning {
-      background-color: #ffc107;
-    }
-
-    .btn-danger {
-      background-color: #dc3545;
-    }
-
-    .animated-button:hover {
-      background-position: right center;
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .admin-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 999;
-      transition: transform 0.3s ease-out;
-    }
-
-    .admin-button:hover {
-      transform: scale(1.1);
-    }
-
-    .admin-button a {
-      color: #fff;
-      text-decoration: none;
-    }
-  </style>
+        section h2,
+        section p {
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
+
 <div th:insert="blocks/header"></div>
 
-<div class="container mt-5">
-  <h1 class="text-center mb-4">Выберите категорию</h1>
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <a href="/books" class="btn btn-primary btn-block mb-3 animated-button">Книги</a>
-      <a href="/persons" class="btn btn-success btn-block mb-3 animated-button">Пользователи</a>
-      <a href="/products" class="btn btn-info btn-block mb-3 animated-button">Продукты</a>
-      <a href="/cars" class="btn btn-warning btn-block mb-3 animated-button">Машины</a>
-      <a href="/houses" class="btn btn-danger btn-block mb-3 animated-button">Дома</a>
-    </div>
-  </div>
-</div>
-
-<div class="admin-button">
-  <a href="/admin" class="btn btn-primary animated-button">Панель администратора</a>
-</div>
+<main>
+    <h2>Почему выбрать AppSeller.Net?</h2>
+    <section>
+        <h3>Достоинства нашего мобильного приложения:</h3>
+        <p>
+            - Простые функции и возможности;
+        </p>
+        <p>
+            - Интуитивно понятный интерфейс;
+        </p>
+        <p>
+            - Быстрая и безопасная загрузка приложений;
+        </p>
+        <a href="#" class="download-button">Скачать приложение</a>
+    </section>
+</main>
 
 <div th:insert="blocks/footer"></div>
+
 </body>
 </html>

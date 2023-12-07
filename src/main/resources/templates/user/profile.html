@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Профиль</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .content-below-header {
+      margin-top: 60px;
+      margin-bottom: 20px;
+    }
+
+    .profile-container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 1);
+    }
+
+    .profile-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .statusConsideration{
+      background-color: yellow;
+    }
+    .statusApproved{
+      background-color: lightgreen;
+    }
+    .statusRejected{
+      background-color: red;
+    }
+    .statusPublished{
+      background-color: lightgreen;
+    }
+    .statusSubmitted {
+      background-color: gray;
+    }
+  </style>
+</head>
+<body>
+
+<div th:insert="blocks/header"></div>
+
+<main class="content-below-header">
+  <div class="container profile-container">
+    <h1 class="text-center mb-4">Ваши данные</h1>
+
+    <div th:if="!${user.painFee} and ${user.role.roleName eq 'Developer'}" class="profile-section">
+      <h2>Предупреждения:</h2>
+      <div class="row">
+        <div class="col-md-8">
+          <div class="mb-3">
+            <label class="form-label d-block">Для публикации контента необходимо оплатить взнос в размере 100 рублей</label>
+            <label class="form-label d-block">
+              <small>Взнос будет списан с вашего баланса</small>
+            </label>
+            <div class="d-flex align-items-center justify-content-between">
+              <a class="btn btn-success" onclick="submitPayment()">Оплатить взнос</a>
+              <small class="ml-2">Нажимая кнопку вы соглашаетесь с ПОЛИТИКОЙ КОНФИДЕНЦИАЛЬНОСТИ КОМПАНИИ</small>
+            </div>
+            <label class="form-label d-block" id="error-label" style="display: none"></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h2>Личные данные</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="id" class="form-label">ID:</label>
+            <span id="id" class="form-control" th:text="${user.id}"></span>
+          </div>
+          <div class="profile-field">
+            <label for="username">Имя пользователя:</label>
+            <span id="username" th:text="${user.username}"></span>
+          </div>
+          <div class="profile-field">
+            <label for="email">Почта:</label>
+            <span id="email" th:text="${user.email}"></span>
+          </div>
+          <div class="profile-field">
+            <label for="registrationDate">Дата регистрации:</label>
+            <span id="registrationDate" th:text="${user.registrationDate}"></span>
+          </div>
+          <div class="profile-field">
+            <label for="role">Роль:</label>
+            <span id="role" th:text="${user.role.roleName}"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h2>Ваш баланс:</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <form th:action="@{/payment}">
+            <input type="hidden" name="action" value="Пополнение баланса профиля">
+            <div class="profile-field">
+              <label id="balance" th:text="${user.balance} + ' рублей'" style="font-size: 22px;"></label>
+            </div>
+            <div class="profile-field">
+              <label for="topUpAmount">Сумма пополнения:</label>
+              <input type="number" id="topUpAmount" name="topUpAmount" required>
+            </div>
+
+            <div class="profile-field">
+              <button type="submit" class="btn btn-primary">Пополнить баланс</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h2>Некоторая статистика:</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="purchasedAppsCount" class="form-label">Количество купленных приложений:</label>
+            <span id="purchasedAppsCount" class="form-control" th:text="${user.purchasedAppsCount}"></span>
+          </div>
+          <div class="profile-field">
+            <label for="totalSpent">Всего потрачено:</label>
+            <span id="totalSpent" th:text="${user.totalSpent}"></span>
+          </div>
+          <div class="profile-field">
+            <label for="personalDiscount">Персональная скидка:</label>
+            <span id="personalDiscount" th:text="${user.personalDiscount}"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section" th:if="${user.role.roleName=='User'}">
+      <h2>Заявки на разработчика:</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mt-4">
+            <div th:if="${not #lists.isEmpty(applications)}">
+              <div class="mt-4">
+                <h5>Последняя заявка:</h5>
+                <span>№</span>
+                <span th:if="${not #lists.isEmpty(applications)}" th:text="${applications[applications.size()-1].id}"></span>
+                <span>-</span>
+                <span th:if="${not #lists.isEmpty(applications)}"
+                      th:class="${applications[applications.size()-1].status != null ?
+                      (applications[applications.size()-1].status.name eq 'На рассмотрении' ? 'statusConsideration' :
+                      (applications[applications.size()-1].status.name eq 'Одобрено' ? 'statusApproved' :
+                      (applications[applications.size()-1].status.name eq 'Отклонено' ? 'statusRejected' :
+                      (applications[applications.size()-1].status.name eq 'Опубликовано' ? 'statusPublished' :
+                       (applications[applications.size()-1].status.name eq 'Отправлено на рассмотрение' ? 'statusSubmitted' : null))))): ''}"
+                      th:text="${applications[applications.size()-1].status.name}"></span>
+                <span>
+                <a th:href="@{/application/{id}(id=${applications[applications.size()-1].id})}" class="btn btn-primary rounded">Просмотреть заявку</a>
+              </span>
+                <p th:if="${applications[applications.size()-1].status.name eq 'Отклонено' or applications[applications.size()-1].status.name eq 'Отозвана'}">
+                  <a href="/application/new" class="btn btn-primary rounded">Подать заявку</a>
+                </p>
+              </div>
+            </div>
+            <div th:if="${not #lists.isEmpty(applications)}">
+              <div class="mt-4">
+                <h5>История заявок и статусов:</h5>
+                <span th:each="app : ${applications}" class="mt-2">
+                <span>№</span>
+                <span th:text="${app.id}"></span>
+                <span>-</span>
+                <span th:text="${app.status != null ? app.status.name : ''}"
+                      th:class="${app.status != null ?
+                (app.status.name eq 'На рассмотрении' ? 'statusConsideration' :
+                (app.status.name eq 'Одобрено' ? 'statusApproved' :
+                (app.status.name eq 'Отклонено' ? 'statusRejected' :
+                (app.status.name eq 'Опубликовано' ? 'statusPublished' :
+                (app.status.name eq 'Отправлено на рассмотрение' ? 'statusSubmitted' : null))))): ''}"></span>
+                <span th:if="${app.id != applications[applications.size()-1].id}">
+                  <span>-</span>
+                  <a th:href="@{/application/{id}(id=${app.id})}" class="btn btn-primary rounded">Просмотреть</a>
+                </span>
+                <br>
+              </span>
+              </div>
+            </div>
+            <div th:if="${#lists.isEmpty(applications)}">
+              <p>У вас нет заявок на разработчика.</p>
+              <a href="/application/new" class="btn btn-primary rounded">Подать заявку</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="profile-section" th:if="${user.role.roleName=='Developer'}">
+      <h2>Публикация приложений:</h2>
+      <a class="btn btn-success" href="/application/new">Создать новое приложение</a>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mt-4">
+            <div th:if="${not #lists.isEmpty(applications)}">
+              <div class="mt-4">
+                <h5>Неопубликованные приложения:</h5>
+                <span th:each="app : ${applications}" class="mt-2">
+                  <a th:if="!${app.active}" th:href="@{/application/{id}(id=${app.id})}">
+                    <span th:text="${app.applicationName}"></span>
+                  </a>
+                </span>
+              </div>
+            </div>
+            <div th:if="${not #lists.isEmpty(applications)}">
+              <div class="mt-4">
+                <h5>Опубликованные приложения:</h5>
+                <span th:each="app : ${applications}" class="mt-2">
+                  <a th:if="${app.active}" th:href="@{/application/{id}(id=${app.id})}">
+                    <span th:text="${app.applicationName}"></span>
+                    <a th:href="@{/statistic/{id}(id=${app.id})}" class="btn btn-primary">Статистика продаж</a>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="profile-section" th:if="${user.role.roleName=='Moder'}">
+      <h2>Заявки от пользователей на публикацию приложений</h2>
+      <div class="row">
+        <div>
+          <div class="form-group mt-4">
+            <a href="/moder/usersApplications" class="btn btn-primary">Перейти</a>
+            <!--<a href="/moder/developerApplications" class="btn btn-primary">На публикацию</a>-->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  function submitPayment() {
+    const successLabel = document.getElementById('error-label');
+    const topUpAmountField = document.getElementById('topUpAmount');
+
+    fetch('/payment/processPayment', {
+      method: 'POST'
+    })
+            .then(response => {
+              if (response.ok) {
+                successLabel.textContent = 'Успешно';
+                successLabel.style.display = 'block';
+                setTimeout(function () {
+                  window.location.href = '/user/profile';
+                }, 2000);
+              } else {
+                successLabel.textContent = 'Недостаточно средств на балансе';
+                successLabel.style.display = 'block';
+                topUpAmountField.focus();
+              }
+            })
+            .catch(error => {
+              successLabel.textContent = 'Непредвиденная ошибка, попробуйте позже...';
+              successLabel.style.display = 'block';
+            });
+  }
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
